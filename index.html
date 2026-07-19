@@ -3,25 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Tebak Angka</title>
+    <title>Untuk Kamu 💌</title>
+
     <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎯 Game Tebak Angka</h1>
+<div id="hearts"></div>
 
-        <p>Aku sudah memilih angka dari 1 sampai 100.</p>
-        <p>Coba tebak!</p>
+<!-- Halaman 1 -->
+<section class="page active" id="page1">
 
-        <input type="number" id="tebakan" placeholder="Masukkan angka">
+    <div class="card">
 
-        <button onclick="cekTebakan()">Tebak</button>
+        <h1>Hai... 😊</h1>
 
-        <p id="hasil"></p>
-        <p id="percobaan">Percobaan: 0</p>
+        <p>
+            Aku bikin website kecil ini khusus buat kamu.
+            Tenang aja kok...
+            cuma butuh sekitar 1 menit ❤️
+        </p>
+
+        <button onclick="nextPage(2)">
+            Buka Surat 💌
+        </button>
+
     </div>
 
-    <script src="script.js"></script>
+</section>
+
+<!-- Halaman 2 -->
+
+<section class="page" id="page2">
+
+<div class="envelope" onclick="openLetter()">
+
+<div class="cover"></div>
+
+<div class="letter">
+
+<h2>💌</h2>
+
+<p>Klik lagi untuk membaca suratnya.</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- Halaman 3 -->
+
+<section class="page" id="page3">
+
+<div class="card">
+
+<h2>Untuk Kamu 🌸</h2>
+
+<p>
+
+Hai...
+
+<br><br>
+
+Mungkin akhir-akhir ini kita jadi jarang ngobrol.
+
+<br><br>
+
+Jujur aja...
+
+aku cukup kangen sama obrolan kita yang dulu.
+
+<br><br>
+
+Aku nggak bikin website ini buat maksa apa pun.
+
+Aku cuma berharap...
+
+kalau kamu berkenan,
+
+kita bisa mulai komunikasi lagi,
+
+pelan-pelan juga nggak apa-apa. 😊
+
+</p>
+
+<button onclick="nextPage(4)">
+Lanjut →
+</button>
+
+</div>
+
+</section>
+
+<!-- Halaman 4 -->
+
+<section class="page" id="page4">
+
+<div class="card">
+
+<h2>Mau nggak...? ❤️</h2>
+
+<p>
+
+Mau nggak kita mulai ngobrol lagi?
+
+</p>
+
+<div class="btns">
+
+<button class="yes"
+onclick="yesAnswer()">
+Iya, boleh ❤️
+</button>
+
+<button
+id="noBtn"
+class="no">
+Gamau 🙈
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- Halaman 5 -->
+
+<section class="page" id="page5">
+
+<div class="card">
+
+<h1>Terima kasih 🌸</h1>
+
+<p>
+
+Seneng banget kamu milih "Iya, boleh."
+
+<br><br>
+
+Kalau kamu benar-benar nggak keberatan...
+
+boleh minta tolong?
+
+<br><br>
+
+📸 Screenshot halaman ini,
+
+lalu kirim ke DM Instagram aku.
+
+<br><br>
+
+Biar aku tahu kalau kamu sudah membuka website ini. 😊
+
+</p>
+
+<button onclick="finish()">
+
+Aku Sudah Screenshot 📷
+
+</button>
+
+</div>
+
+</section>
+
+<script src="script.js"></script>
+
 </body>
 </html>
