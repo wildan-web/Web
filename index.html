@@ -1,27 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Tebak Angka</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FC Mobile Tournament</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1020;color:#eef2ff}
+header{padding:18px 16px;background:linear-gradient(135deg,#111936,#18245a);position:sticky;top:0;z-index:5;border-bottom:1px solid #29345f}
+h1,h2,h3,p{margin:0}.sub{color:#aab4d6;font-size:13px;margin-top:4px}.wrap{max-width:1100px;margin:auto;padding:14px}
+nav{display:flex;gap:8px;overflow:auto;padding:10px 0}nav button,.btn{border:0;border-radius:10px;padding:10px 14px;background:#202b50;color:#eef2ff;font-weight:700;cursor:pointer}nav button.active,.primary{background:#4f67ff}.danger{background:#9d3042}.green{background:#16815a}.muted{color:#9da8c9}
+.panel{background:#121a32;border:1px solid #273254;border-radius:16px;padding:14px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#171f3b;border-radius:12px;padding:12px}.stat b{font-size:22px;display:block}
+.card{background:#151e39;border:1px solid #2a3559;border-radius:14px;padding:12px}.card h3{margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 5px;border-bottom:1px solid #293452;text-align:center}th{color:#aeb9db}td:nth-child(2),th:nth-child(2){text-align:left}
+input[type=number]{width:55px;background:#0b1020;color:white;border:1px solid #354263;border-radius:8px;padding:7px;text-align:center}
+input[type=text]{width:100%;background:#0b1020;color:white;border:1px solid #354263;border-radius:8px;padding:9px}
+.match{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #293452}.team{width:34%;font-weight:700}.away{text-align:right}.score{white-space:nowrap}.done{color:#55d69b;font-size:11px}.pending{color:#9da8c9;font-size:11px}
+.small{font-size:11px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row .btn{flex:0 0 auto}
+.hidden{display:none}.qual{color:#65e0a3;font-weight:800}.champ{text-align:center;padding:28px;background:linear-gradient(135deg,#202d64,#171f3b);border-radius:18px}.champ .cup{font-size:48px}.champ h2{font-size:28px;margin:8px 0}
+.bracket{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;overflow:auto}.round{min-width:210px}.matchbox{background:#171f3b;border:1px solid #303d65;border-radius:12px;padding:10px;margin:10px 0}.pick{display:block;width:100%;text-align:left;background:#202b50;color:white;border:0;padding:8px;border-radius:7px;margin:4px 0;cursor:pointer}.pick:hover{background:#4f67ff}
+.notice{padding:10px;border-radius:10px;background:#1d2748;color:#cbd5f5;margin-bottom:10px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.bracket{grid-template-columns:repeat(4,210px)}header{position:static}.wrap{padding:10px}}
+</style>
 </head>
 <body>
+<header><div class="wrap">
+<h1>FC MOBILE TOURNAMENT</h1><div class="sub">GROUP STAGE • KNOCKOUT • FINAL</div>
+<nav id="nav"></nav>
+</div></header>
+<main class="wrap" id="app"></main>
+<script>
+const NAMES=["ALiFOO","godek","Tn•MasCly1xBet","anakpanggungsari","ahmad","HA•LimO","HERYYY","ICN•INFERNOZ","QINZX","Vtublox","RDS•DARKNESS","CSK•Diiメ2309シ","ICN•REYYxMONZZ","ICN•Antihero","•KING•••GZ•","SIR•Zoro•777","Biasa","FCBayernMunchen","TC•RyuRaijinxAS","Chelmetzyy","SSV.MESSIBANG77","K4SU","SSV•NIZAR","RAPAA","Barcelona•BL","kingdarderdor","GGI-LIKK18","yuu","FNX•Conductor 7","Raka_masihbot","CS•Jidzy-XD","Upin botak","real_OPstar","Glasgow","EL•DxFluxxo","Mzzzz","PERUSAKGAME","MTxKuveskii.","ELCINTURON","Vanky","rdhozzboyy.","MIRZAL","yudaaaaaa","--ghafa--","DEALL1223","Danives"];
+const groups={A:5,B:5,C:5,D:5,E:5,F:5,G:4,H:4,I:4,J:4};
+let state=JSON.parse(localStorage.getItem("fcm_tournament")||"null");
+if(!state) state={players:NAMES.map((name,i)=>({id:i,name})),groups:null,groupMatches:[],knockout:null,tab:"dashboard"};
 
-    <div class="container">
-        <h1>🎯 Game Tebak Angka</h1>
-
-        <p>Aku sudah memilih angka dari 1 sampai 100.</p>
-        <p>Coba tebak!</p>
-
-        <input type="number" id="tebakan" placeholder="Masukkan angka">
-
-        <button onclick="cekTebakan()">Tebak</button>
-
-        <p id="hasil"></p>
-        <p id="percobaan">Percobaan: 0</p>
-    </div>
-
-    <script src="script.js"></script>
+function save(){localStorage.setItem("fcm_tournament",JSON.stringify(state));render()}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function generate(){
+ let p=shuffle(state.players), gs={}, idx=0;
+ for(const [g,n] of Object.entries(groups)) gs[g]=p.slice(idx,idx+n).map(x=>x.id),idx+=n;
+ state.groups=gs; state.groupMatches=[];
+ for(const [g,ids] of Object.entries(gs)) for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++) state.groupMatches.push({id:`${g}-${i}-${j}`,g,a:ids[i],b:ids[j],sa:null,sb:null});
+ state.knockout=null; save();
+}
+function player(id){return state.players.find(p=>p.id===id)?.name||"—"}
+function standings(g){
+ let rows=state.groups[g].map(id=>({id,name:player(id),p:0,w:0,d:0,l:0,gf:0,ga:0,gd:0,pts:0}));
+ let map=Object.fromEntries(rows.map(r=>[r.id,r]));
+ state.groupMatches.filter(m=>m.g===g&&m.sa!==null&&m.sb!==null).forEach(m=>{
+   let a=map[m.a],b=map[m.b];a.p++;b.p++;a.gf+=m.sa;b.gf+=m.sb;a.ga+=m.sb;b.ga+=m.sa;
+   if(m.sa>m.sb){a.w++;b.l++;a.pts+=3}else if(m.sa<m.sb){b.w++;a.l++;b.pts+=3}else{a.d++;b.d++;a.pts++;b.pts++}
+ });
+ rows.forEach(r=>r.gd=r.gf-r.ga);
+ rows.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||a.name.localeCompare(b.name));
+ return rows;
+}
+function qualified(){
+ if(!state.groups)return [];
+ let q=[]; ["A","B","C","D","E","F"].forEach(g=>{let s=standings(g);if(s.length){q.push(s[0]);if(s[1])q.push(s[1])}});
+ ["G","H","I","J"].forEach(g=>{let s=standings(g);if(s.length)q.push(s[0])});
+ return q.slice(0,16);
+}
+function setGroupScore(id,side,val){
+ let m=state.groupMatches.find(x=>x.id===id); if(!m)return;
+ val=val===""?null:Math.max(0,parseInt(val)||0); m[side]=val; save();
+}
+function ensureKO(){
+ let q=qualified(); if(q.length<16){alert("Belum ada 16 peserta yang bisa masuk knockout.");return}
+ const pairs=[[q[0],q[3]],[q[2],q[1]],[q[4],q[7]],[q[6],q[5]],[q[8],q[11]],[q[10],q[9]],[q[12],q[15]],[q[14],q[13]]];
+ state.knockout={rounds:[pairs.map((p,i)=>({id:"R16-"+i,a:p[0].id,b:p[1].id,sa:null,sb:null,winner:null}))]};
+ for(let r=1;r<4;r++)state.knockout.rounds.push([]);
+ state.tab="knockout";save();
+}
+function koScore(round,index,side,val){
+ let m=state.knockout.rounds[round][index];val=val===""?null:Math.max(0,parseInt(val)||0);m[side]=val;
+ if(m.sa!==null&&m.sb!==null&&m.sa!==m.sb)m.winner=m.sa>m.sb?m.a:m.b;
+ else if(m.sa===null||m.sb===null)m.winner=null;
+ else m.winner=null;
+ buildNext(round);save();
+}
+function buildNext(r){
+ let cur=state.knockout.rounds[r], next=[];
+ if(r>=3)return;
+ for(let i=0;i<cur.length;i+=2){
+   if(cur[i]?.winner&&cur[i+1]?.winner) next.push({id:`R${r+1}-${i/2}`,a:cur[i].winner,b:cur[i+1].winner,sa:null,sb:null,winner:null});
+ }
+ state.knockout.rounds[r+1]=next;
+}
+function pickWinner(r,i,id){let m=state.knockout.rounds[r][i];m.winner=id;buildNext(r);save()}
+function copyText(text){navigator.clipboard?.writeText(text).then(()=>alert("Hasil berhasil dicopy."),()=>alert(text))}
+function groupText(g){let s=standings(g);return `🏆 HASIL GRUP ${g}\\n\\n`+s.map((x,i)=>`${i+1}. ${x.name} — ${x.pts} PTS (GD ${x.gd})`).join("\\n")}
+function render(){
+ const tabs=[["dashboard","Dashboard"],["groups","Groups"],["matches","Matches"],["knockout","Knockout"],["champion","Champion"]];
+ nav.innerHTML=tabs.map(([id,t])=>`<button class="${state.tab===id?'active':''}" onclick="state.tab='${id}';render()">${t}</button>`).join("");
+ const app=document.getElementById("app");
+ if(!state.groups&&state.tab!=="dashboard")state.tab="dashboard";
+ if(state.tab==="dashboard")app.innerHTML=dashboard();
+ if(state.tab==="groups")app.innerHTML=groupsPage();
+ if(state.tab==="matches")app.innerHTML=matchesPage();
+ if(state.tab==="knockout")app.innerHTML=koPage();
+ if(state.tab==="champion")app.innerHTML=championPage();
+}
+function dashboard(){
+ let played=state.groupMatches.filter(m=>m.sa!==null&&m.sb!==null).length;
+ let champ=state.knockout?.rounds?.[3]?.[0]?.winner;
+ return `<div class="panel"><div class="stats">
+ <div class="stat"><b>${state.players.length}</b><span class="muted">Peserta</span></div>
+ <div class="stat"><b>10</b><span class="muted">Grup</span></div>
+ <div class="stat"><b>${played}/${state.groupMatches.length}</b><span class="muted">Match Grup</span></div>
+ <div class="stat"><b>${champ?player(champ):"—"}</b><span class="muted">Juara</span></div></div></div>
+ <div class="panel"><h2>Kontrol Turnamen</h2><p class="muted small" style="margin:7px 0 12px">Data tersimpan otomatis di browser perangkat ini.</p>
+ <div class="row"><button class="btn primary" onclick="generate()">Generate / Acak Grup</button><button class="btn green" onclick="ensureKO()">Buat Knockout</button><button class="btn" onclick="exportData()">Export Data</button><button class="btn" onclick="document.getElementById('imp').click()">Import Data</button><input id="imp" type="file" accept=".json" class="hidden" onchange="importData(this)"><button class="btn danger" onclick="resetAll()">Reset</button></div></div>
+ <div class="panel"><h2>Format</h2><p class="muted" style="margin-top:8px">Grup A–F: 5 peserta. Grup G–J: 4 peserta. Juara semua grup + runner-up A–F = 16 besar.</p></div>`;
+}
+function groupsPage(){
+ if(!state.groups)return `<div class="panel"><div class="notice">Belum ada pembagian grup.</div><button class="btn primary" onclick="generate()">Generate Grup</button></div>`;
+ return `<div class="grid">${Object.keys(groups).map(g=>{let s=standings(g);return `<div class="card"><h3>GRUP ${g}</h3><table><tr><th>POS</th><th>PLAYER</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>PTS</th></tr>${s.map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.p}</td><td>${x.w}</td><td>${x.d}</td><td>${x.l}</td><td>${x.gd}</td><td>${x.pts}</td></tr>`).join("")}</table><button class="btn" style="margin-top:10px;width:100%" onclick="copyText(groupText('${g}'))">Copy Hasil Grup</button></div>`}).join("")}</div>`;
+}
+function matchesPage(){
+ if(!state.groups)return `<div class="panel">Generate grup terlebih dahulu.</div>`;
+ return Object.keys(groups).map(g=>`<div class="panel"><h2>GRUP ${g}</h2>${state.groupMatches.filter(m=>m.g===g).map(m=>matchHTML(m)).join("")}</div>`).join("");
+}
+function matchHTML(m){
+ return `<div class="match"><div class="team">${player(m.a)}<div class="${m.sa!==null?'done':'pending'}">${m.sa!==null?'SELESAI':'BELUM DIMAINKAN'}</div></div><div class="score"><input type="number" min="0" value="${m.sa??''}" onchange="setGroupScore('${m.id}','sa',this.value)"> <b>-</b> <input type="number" min="0" value="${m.sb??''}" onchange="setGroupScore('${m.id}','sb',this.value)"></div><div class="team away">${player(m.b)}</div></div>`;
+}
+function koMatch(m,r,i){
+ if(!m)return "";
+ return `<div class="matchbox"><div class="small muted">MATCH ${i+1}</div><b>${player(m.a)}</b><div class="row"><input type="number" min="0" value="${m.sa??''}" onchange="koScore(${r},${i},'sa',this.value)"><span>-</span><input type="number" min="0" value="${m.sb??''}" onchange="koScore(${r},${i},'sb',this.value)"></div><b>${player(m.b)}</b>${m.sa!==null&&m.sb!==null&&m.sa===m.sb?`<div class="small muted" style="margin-top:7px">Skor seri — pilih pemenang:</div><button class="pick" onclick="pickWinner(${r},${i},${m.a})">${player(m.a)}</button><button class="pick" onclick="pickWinner(${r},${i},${m.b})">${player(m.b)}</button>`:""}${m.winner?`<div class="qual" style="margin-top:7px">Lolos: ${player(m.winner)}</div>`:""}</div>`;
+}
+function koPage(){
+ if(!state.knockout)return `<div class="panel"><h2>Knockout</h2><p class="muted" style="margin:8px 0">Selesaikan/atur fase grup sampai tersedia 16 peserta, lalu buat knockout.</p><button class="btn primary" onclick="ensureKO()">Buat Knockout</button></div>`;
+ let names=["ROUND OF 16","QUARTER FINAL","SEMI FINAL","FINAL"];
+ return `<div class="bracket">${state.knockout.rounds.map((r,i)=>`<div class="round"><h3>${names[i]}</h3>${r.map((m,j)=>koMatch(m,i,j)).join("")||'<div class="notice">Menunggu ronde sebelumnya.</div>'}</div>`).join("")}</div>`;
+}
+function championPage(){
+ let winner=state.knockout?.rounds?.[3]?.[0]?.winner;
+ return winner?`<div class="champ"><div class="cup">🏆</div><div class="muted">FC MOBILE TOURNAMENT</div><h2>JUARA 1</h2><h1>${player(winner)}</h1><p class="muted" style="margin-top:8px">Selamat atas kemenangan turnamen!</p></div>`:`<div class="panel"><h2>Champion</h2><p class="muted" style="margin-top:8px">Juara akan muncul setelah final selesai.</p></div>`;
+}
+function resetAll(){if(confirm("Yakin reset seluruh turnamen?")){localStorage.removeItem("fcm_tournament");location.reload()}}
+function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fc-mobile-tournament.json";a.click();URL.revokeObjectURL(a.href)}
+function importData(input){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);save()}catch(e){alert("File tidak valid.")}};r.readAsText(f)}
+render();
+</script>
 </body>
 </html>
